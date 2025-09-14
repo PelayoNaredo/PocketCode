@@ -1,10 +1,5 @@
 # PocketCode
 
-
-Edita con Documentos
-Haz cambios, inserta comentarios y comparte archivos con otros usuarios para editarlos al mismo tiempo.
-NO, GRACIASUSAR LA APLICACIÓN
-
 Diseño IDE Android Nativo
 
 AndroidCode IDE: Informe de Diseño Técnico y Estrategia de Producto
