@@ -1,0 +1,23 @@
+{
+  "name": "api-proxy-service",
+  "version": "1.0.0",
+  "description": "Secure API Proxy for the PocketCode IDE to handle third-party API keys.",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "node src/index.ts"
+  },
+  "dependencies": {
+    "express": "latest"
+  },
+  "devDependencies": {
+    "typescript": "latest"
+  }
+}
+// This file manages the Node.js dependencies for the Secure API Proxy.
+// It will include dependencies for forwarding requests and potentially for
+// caching responses (e.g., a Redis client).
+//
+// Interacts with:
+// - External Services (e.g., Google AI Platform): Forwards requests to them.
+// - Firestore: To retrieve user-provided API keys ("Bring Your Own Key" model).
+// - Firebase Authentication: To verify the user's token before processing a request.

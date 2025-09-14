@@ -1,0 +1,20 @@
+# This file specifies intentionally untracked files to ignore.
+# For a Node.js backend, this typically includes:
+
+# Dependencies
+/node_modules
+
+# Build outputs
+/dist
+/build
+
+# Log files
+*.log
+
+# Environment variables
+.env
+
+# Terraform files
+.terraform/
+*.tfstate
+*.tfstate.backup

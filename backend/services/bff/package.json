@@ -1,0 +1,22 @@
+{
+  "name": "bff-service",
+  "version": "1.0.0",
+  "description": "Backend for Frontend service for the PocketCode IDE.",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "node src/index.ts"
+  },
+  "dependencies": {
+    "express": "latest"
+  },
+  "devDependencies": {
+    "typescript": "latest"
+  }
+}
+// This file manages the Node.js dependencies and scripts for the BFF service.
+// It will include dependencies for the web framework (e.g., Express),
+// Firebase Admin SDK for authentication, and other necessary libraries.
+// It connects to:
+// - Firestore to manage project metadata and user data.
+// - Google Cloud Storage to handle file references.
+// - Firebase Authentication to verify user tokens.
