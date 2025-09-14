@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.pocketcode.features.settings"
+    namespace = "com.pocketcode.features.onboarding"
     compileSdk = 33
 
     defaultConfig {
