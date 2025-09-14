@@ -1,6 +1,8 @@
 package com.pocketcode.domain.project.repository
 
 import com.pocketcode.domain.project.model.Project
+import com.pocketcode.domain.project.model.ProjectFile
+import kotlinx.coroutines.flow.Flow
 
 /**
  * This is the Repository Interface for project-related data operations.
@@ -16,6 +18,23 @@ import com.pocketcode.domain.project.model.Project
  * - The `:data:project` module, which provides the concrete implementation.
  */
 interface ProjectRepository {
-    // suspend fun getProjects(): List<Project>
-    // suspend fun createProject(name: String): Result<Project>
+
+    fun getProjects(): Flow<List<Project>>
+
+    suspend fun getProject(id: String): Project?
+
+    suspend fun createProject(name: String): Result<Project>
+
+    suspend fun deleteProject(id: String): Result<Unit>
+
+    suspend fun getFileContent(project: Project, filePath: String): Result<String>
+
+    suspend fun saveFileContent(project: Project, filePath: String, content: String): Result<Unit>
+
+    suspend fun listFiles(project: Project, path: String): Result<List<ProjectFile>>
+
+    // Git Operations
+    suspend fun initGitRepo(project: Project): Result<Unit>
+    suspend fun addFileToGit(project: Project, filePattern: String): Result<Unit>
+    suspend fun commitChanges(project: Project, message: String): Result<Unit>
 }

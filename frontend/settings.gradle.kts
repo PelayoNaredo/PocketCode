@@ -1,9 +1,38 @@
-// This file defines the project structure and tells Gradle which modules to include in the build.
-// Responsibilities:
-// - Include all the Gradle modules that are part of the project using `include()`.
-//   (e.g., include(":app"), include(":core:ui"), include(":features:editor")).
-// - Configure plugin management repositories (e.g., `google()`, `mavenCentral()`).
-// - Can set the project name.
-//
-// This file is crucial for the multi-module architecture to work correctly.
-// It will list every module created in the `core`, `data`, `domain`, and `features` directories.
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = uri("https://jitpack.io") }
+    }
+}
+
+rootProject.name = "PocketCode"
+include(":app")
+include(":core:ui")
+include(":core:utils")
+include(":core:network")
+include(":core:storage")
+include(":core:api")
+include(":core:p2p")
+include(":data:ide")
+include(":data:project")
+include(":data:marketplace")
+include(":data:ai")
+include(":domain:ide")
+include(":domain:project")
+include(":domain:marketplace")
+include(":domain:ai")
+include(":features:editor")
+include(":features:project")
+include(":features:settings")
+include(":features:designer")
+include(":features:marketplace")
+include(":features:ai")
