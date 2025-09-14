@@ -1,0 +1,53 @@
+# This GitHub Actions workflow defines the CI/CD pipeline for a user's project.
+# It is triggered by a `git push` to the user's private repository.
+# The PocketCode platform will automatically place this file in each user's project repo.
+
+name: Android Build & Sign
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v2
+
+    - name: Build with Gradle
+      run: ./gradlew bundleRelease
+      # This command compiles the user's Android project into a release bundle (AAB).
+
+    - name: Sign Android App Bundle
+      uses: r0adkll/sign-android-release@v1
+      with:
+        releaseDirectory: app/build/outputs/bundle/release
+        signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
+        alias: ${{ secrets.ANDROID_SIGNING_ALIAS }}
+        keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      # This step uses secrets stored in the GitHub repository to sign the AAB.
+      # These secrets are managed by the PocketCode platform.
+
+    - name: Upload Artifact to Google Cloud Storage
+      # This step would use a tool like `gsutil` or a dedicated GitHub Action
+      # to upload the signed AAB from the release directory to the `build-artifacts` GCS bucket.
+      # It requires authentication to GCP, likely using a service account key stored as a secret.
+      run: echo "Uploading artifact to GCS..."
+
+    - name: Update Build Status in Firestore
+      # This final step would use a script or tool to communicate with the BFF or directly
+      # with Firestore to update the build status (e.g., 'success') and provide a link
+      # to the downloadable artifact in GCS.
+      run: echo "Updating build status in Firestore..."
