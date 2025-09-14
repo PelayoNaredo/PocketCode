@@ -1,10 +1,21 @@
-// This is the main entry point for the Backend for Frontend (BFF) service.
-// It will initialize the server (e.g., Express), set up middleware for
-// authentication and logging, and register the API routes.
-// It orchestrates the core business logic, interacting with various GCP services.
-//
-// Interacts with:
-// - `./routes/`: Defines the API endpoints exposed to the mobile client.
-// - `Firebase Authentication`: To secure the endpoints.
-// - `Firestore`: To fetch or modify data.
-// - `Google Cloud Storage`: To manage file operations.
+import express from 'express';
+import allRoutes from './api/routes';
+
+// Basic server setup
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// Main application routes
+app.use('/api/v1', allRoutes);
+
+// Simple health check endpoint
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+});
+
+app.listen(PORT, () => {
+    console.log(`BFF service listening on port ${PORT}`);
+});

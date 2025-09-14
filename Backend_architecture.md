@@ -84,20 +84,32 @@ This section outlines the repository structure for the backend services and the 
 │   │   ├── Dockerfile
 │   │   ├── package.json
 │   │   └── src/
-│   │       ├── index.ts
-│   │       ├── routes/
-│   │       └── services/
+│   │       ├── api/
+│   │       │   ├── controllers/
+│   │       │   └── routes/
+│   │       ├── config/
+│   │       ├── core/
+│   │       │   └── services/
+│   │       ├── middleware/
+│   │       ├── types/
+│   │       ├── utils/
+│   │       └── index.ts
 │   └── api-proxy/
 │       ├── Dockerfile
 │       ├── package.json
 │       └── src/
-│           ├── index.ts
-│           └── utils/
+│           ├── handlers/
+│           ├── utils/
+│           └── index.ts
 ├── terraform/
 │   ├── cloud_run.tf
 │   ├── firestore.tf
 │   ├── storage.tf
 │   └── variables.tf
+├── user-project-template/
+│   └── .github/
+│       └── workflows/
+│           └── android-build.yml
 ├── .gitignore
 └── README.md
 ```
