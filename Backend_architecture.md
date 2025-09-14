@@ -27,6 +27,7 @@ This document outlines the backend and cloud infrastructure for the PocketCode I
   - Expose a clean, mobile-optimized REST/GraphQL API.
   - Handle business logic that involves multiple services (e.g., creating a new project entry in Firestore and its corresponding folder in Cloud Storage).
   - Authenticate and authorize all incoming requests from the client using Firebase Auth tokens.
+  - Route requests to other internal services like the API Proxy or the Marketplace Service.
 
 ### b. Secure API Proxy
 - **Service:** Google Cloud Run
@@ -34,46 +35,52 @@ This document outlines the backend and cloud infrastructure for the PocketCode I
 - **Workflow:**
   1. The mobile client makes a request to the proxy endpoint (e.g., `/proxy/ai/generate`).
   2. The proxy verifies the user's authentication token.
-  3. It retrieves the appropriate API key. This could be the platform's key or a user-provided key (for the "Bring Your Own Key" model), which is stored securely in Firestore.
-  4. The proxy injects the key into the request and forwards it to the external service (e.g., Google AI Platform).
-  5. It can optionally cache responses (e.g., using Redis or Memorystore) to reduce latency and cost.
+  3. It retrieves the appropriate API key (either the platform's key or a user-provided key).
+  4. The proxy injects the key into the request and forwards it to the external service.
+  5. It can optionally cache responses to reduce latency and cost.
   6. It returns the response to the client.
 
-### c. CI/CD "Code-to-Cloud" Pipeline
+### c. Community Marketplace Service
+- **Service:** Google Cloud Run
+- **Purpose:** To handle all logic related to the community asset marketplace.
+- **Responsibilities:**
+  - Manage the lifecycle of assets (templates, components) including uploads, updates, and deletions.
+  - Handle user profiles, ratings, and comments for assets.
+  - Provide APIs for searching, filtering, and retrieving marketplace assets.
+
+### d. CI/CD "Code-to-Cloud-to-Store" Pipeline
 - **Service:** GitHub Actions
-- **Purpose:** To compile, sign, and prepare the user's Android project for download.
+- **Purpose:** To compile, sign, and automatically publish the user's Android project.
 - **Workflow:**
-  1. **Trigger:** The user presses the "Build" button in the IDE. This action pushes the current state of the code to a dedicated, private GitHub repository for that project/user.
-  2. **Execution:** A `git push` event triggers a predefined GitHub Actions workflow (`.github/workflows/android-build.yml`).
-  3. **Build Steps:**
-     - The workflow runs on a GitHub-hosted runner (e.g., `ubuntu-latest`).
-     - It checks out the source code.
-     - It sets up the correct Java and Android SDK versions.
-     - It executes the Gradle build command (e.g., `./gradlew bundleRelease`).
-  4. **Signing:**
-     - The Android signing key is stored as an encrypted secret in GitHub Secrets.
-     - A dedicated action signs the generated AAB/APK.
-  5. **Artifact Storage:**
-     - The signed artifact is uploaded to a designated bucket in Google Cloud Storage.
-     - The build status (success/failure) and a link to the artifact are written to Firestore.
-  6. **Notification:** The mobile client, which has been polling Firestore or listening for real-time updates, is notified that the build is complete and can download the artifact.
+  1. **Trigger:** The user action in the IDE pushes the code to a private GitHub repository.
+  2. **Execution & Build:** A GitHub Actions workflow builds the AAB/APK, using remote caching to speed up the process.
+  3. **Signing:** The artifact is securely signed using a key stored in GitHub Secrets.
+  4. **Artifact Storage:** The signed artifact is uploaded to Google Cloud Storage.
+  5. **Automated Publishing:** The pipeline connects to the Google Play Developer API (using a secure service account) to:
+     - Upload the AAB to a specified track (e.g., internal testing, alpha, beta).
+     - Generate release notes from commit messages.
+     - Submit the new version for review.
+  6. **Notification:** The build/publish status and a link to the Play Store listing are written to Firestore and sent to the client.
 
 ## 4. Data Management
 
 ### Cloud Firestore
-- **`users` collection:** Stores user profiles, settings, and encrypted credentials for third-party services.
-- **`projects` collection:** Stores metadata for each project, including its name, description, and a reference to its location in Cloud Storage.
-- **`builds` collection:** Stores a log of all build jobs, their status, timestamps, and a link to the final artifact.
+- **`users` collection:** Stores user profiles, settings, encrypted credentials, and creator profiles for the marketplace.
+- **`projects` collection:** Stores metadata for each project.
+- **`builds` collection:** Stores a log of all build and publishing jobs.
+- **`marketplace_assets` collection:** Stores all metadata for marketplace assets, including description, author, version, and link to files in Cloud Storage.
+- **`asset_reviews` collection:** Stores user ratings and comments for each asset.
 
 ### Google Cloud Storage
 - **Buckets:**
   - `project-source-files/`: Stores the raw source code for each user project.
-  - `build-artifacts/`: Stores the compiled APKs and AABs generated by the CI/CD pipeline.
-- **Lifecycle Policies:** Policies will be implemented to move older build artifacts to cheaper storage classes (e.g., Nearline or Coldline) to manage costs.
+  - `build-artifacts/`: Stores the compiled APKs and AABs.
+  - `marketplace-assets/`: Stores the downloadable files for community marketplace assets.
+- **Lifecycle Policies:** Policies will be implemented to move older build artifacts to cheaper storage classes.
 
 ## 5. Backend Repository & CI/CD Structure
 
-This section outlines the repository structure for the backend services and the CI/CD pipeline definitions. A monorepo approach is suitable for managing the backend services.
+This section outlines the monorepo structure for the backend services.
 
 ### Backend Monorepo Structure
 
@@ -82,25 +89,13 @@ This section outlines the repository structure for the backend services and the 
 ├── services/
 │   ├── bff/
 │   │   ├── Dockerfile
-│   │   ├── package.json
 │   │   └── src/
-│   │       ├── api/
-│   │       │   ├── controllers/
-│   │       │   └── routes/
-│   │       ├── config/
-│   │       ├── core/
-│   │       │   └── services/
-│   │       ├── middleware/
-│   │       ├── types/
-│   │       ├── utils/
-│   │       └── index.ts
-│   └── api-proxy/
+│   ├── api-proxy/
+│   │   ├── Dockerfile
+│   │   └── src/
+│   └── marketplace-service/
 │       ├── Dockerfile
-│       ├── package.json
 │       └── src/
-│           ├── handlers/
-│           ├── utils/
-│           └── index.ts
 ├── terraform/
 │   ├── cloud_run.tf
 │   ├── firestore.tf
@@ -109,14 +104,14 @@ This section outlines the repository structure for the backend services and the 
 ├── user-project-template/
 │   └── .github/
 │       └── workflows/
-│           └── android-build.yml
+│           └── android-publish.yml
 ├── .gitignore
 └── README.md
 ```
 
 ### User Project CI/CD Structure
 
-This structure exists within each user's private project repository on GitHub, automatically managed by the PocketCode platform.
+This structure exists within each user's private project repository on GitHub.
 
 ```
 .
@@ -126,7 +121,7 @@ This structure exists within each user's private project repository on GitHub, a
 ├── ... (user's project files)
 └── .github/
     └── workflows/
-        └── android-build.yml
+        └── android-publish.yml
 ```
 
-- **`android-build.yml`:** This file contains the full definition of the CI/CD pipeline as described in Section 3c. It defines the jobs for building, signing, and uploading the Android application artifact.
+- **`android-publish.yml`:** This file contains the full definition of the CI/CD pipeline as described in Section 3d. It defines the jobs for building, signing, uploading the artifact, and publishing to the Google Play Store.
