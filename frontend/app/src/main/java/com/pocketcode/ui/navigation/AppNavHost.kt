@@ -1,36 +1,66 @@
 package com.pocketcode.ui.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.pocketcode.features.marketplace.ui.detail.MarketplaceDetailScreen
+import com.pocketcode.features.marketplace.ui.home.MarketplaceHomeScreen
+import com.pocketcode.features.marketplace.ui.upload.AssetUploadScreen
 
-/**
- * This composable function is responsible for setting up the application's navigation graph.
- * It uses Jetpack Navigation Compose to define all possible navigation paths and their
- * corresponding screens (composables).
- *
- * Responsibilities:
- * - Create a `NavController` to manage the navigation state.
- * - Configure a `NavHost` with all the navigation destinations.
- * - Define routes for each feature screen (e.g., "project_dashboard", "editor/{projectId}", "settings").
- * - Handle the navigation logic between screens.
- *
- * Interacts with:
- * - `MainActivity`: This `AppNavHost` is hosted within the MainActivity.
- * - All `:features:*` modules: It will reference the main composable screen from each feature module
- *   to set them as destinations in the navigation graph.
- */
+object AppRoutes {
+    const val DASHBOARD = "dashboard"
+    const val MARKETPLACE_HOME = "marketplace_home"
+    const val MARKETPLACE_DETAIL = "marketplace_detail/{assetId}"
+    const val MARKETPLACE_UPLOAD = "marketplace_upload"
+}
+
 @Composable
 fun AppNavHost() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "dashboard") {
-        // Example destination. Each feature will have its own navigation graph or composable screen.
-        composable("dashboard") {
-            // Placeholder for the Project Dashboard screen from the :features:project module
+    NavHost(navController = navController, startDestination = AppRoutes.DASHBOARD) {
+
+        composable(AppRoutes.DASHBOARD) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Button(onClick = { navController.navigate(AppRoutes.MARKETPLACE_HOME) }) {
+                    Text("Go to Marketplace")
+                }
+            }
         }
-        composable("editor/{projectId}") {
-            // Placeholder for the Editor screen from the :features:editor module
+
+        // Marketplace Routes
+        composable(route = AppRoutes.MARKETPLACE_HOME) {
+            MarketplaceHomeScreen(
+                onAssetClick = { assetId ->
+                    navController.navigate("marketplace_detail/$assetId")
+                },
+                onUploadClick = {
+                    navController.navigate(AppRoutes.MARKETPLACE_UPLOAD)
+                }
+            )
+        }
+        composable(
+            route = AppRoutes.MARKETPLACE_DETAIL,
+            arguments = listOf(navArgument("assetId") { type = NavType.StringType })
+        ) {
+            MarketplaceDetailScreen(
+                onNavigateUp = { navController.popBackStack() }
+            )
+        }
+        composable(route = AppRoutes.MARKETPLACE_UPLOAD) {
+            AssetUploadScreen(
+                onUploadSuccess = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }
