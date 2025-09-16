@@ -39,3 +39,6 @@ include(":features:ai")
 include(":features:auth")
 include(":domain:auth")
 include(":data:auth")
+include(":features:authentication")
+include(":features:onboarding")
+
