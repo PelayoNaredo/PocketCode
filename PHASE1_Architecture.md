@@ -162,3 +162,88 @@ Esta arquitectura final se construirá de forma incremental, priorizando el valo
 
 *   **Fase 4: Ecosistema y Liderazgo de Mercado:** Construir las características que consoliden el producto como líder en su nicho.
     *   **Funcionalidades:** El mercado comunitario de activos, el diseñador visual de UI para Jetpack Compose y la funcionalidad "Device Mesh".
+
+---
+
+## 7. Estructura Detallada del Proyecto Final
+
+Esta sección describe la organización de carpetas y archivos para los monorepos de frontend y backend, proporcionando una guía clara para la navegación y el desarrollo.
+
+### 7.1. Estructura del Backend
+
+El backend se organiza como un monorepo para facilitar la gestión de los diferentes microservicios y la infraestructura.
+
+```
+backend/
+├── .gitignore
+├── README.md
+├── services/
+│   ├── api-proxy/
+│   │   ├── Dockerfile      # Conteneriza el servicio de proxy para su despliegue en Cloud Run.
+│   │   ├── package.json    # Gestiona las dependencias (ej. express, axios).
+│   │   └── src/            # Código fuente del proxy (Node.js/Express o similar).
+│   ├── bff/
+│   │   ├── Dockerfile      # Conteneriza el BFF para su despliegue.
+│   │   ├── package.json    # Dependencias del Backend-for-Frontend.
+│   │   └── src/            # Lógica de negocio del BFF.
+│   └── marketplace-service/
+│       ├── Dockerfile      # Conteneriza el servicio del mercado.
+│       ├── package.json    # Dependencias del servicio del mercado.
+│       └── src/            # Lógica de negocio del mercado.
+├── terraform/
+│   ├── .gitkeep
+│   ├── cloud_run.tf        # Define los servicios de Cloud Run para el BFF, proxy, etc.
+│   ├── firestore.tf        # Define las reglas y colecciones de Firestore.
+│   ├── storage.tf          # Define los buckets de Cloud Storage y sus políticas.
+│   └── variables.tf        # Variables de configuración para los entornos (dev, prod).
+└── user-project-template/
+    └── .github/
+        └── workflows/
+            └── android-publish.yml # Plantilla del pipeline de CI/CD que se copiará
+                                    # a cada nuevo proyecto de usuario en GitHub.
+```
+
+### 7.2. Estructura del Frontend
+
+El frontend sigue una arquitectura multi-módulo de Android, donde cada capa y cada funcionalidad están encapsuladas en su propio módulo Gradle.
+
+```
+frontend/
+├── build.gradle.kts        # Script de compilación a nivel de raíz.
+├── settings.gradle.kts     # Define todos los módulos incluidos en el proyecto.
+├── app/
+│   ├── build.gradle.kts
+│   └── src/main/           # Punto de entrada de la aplicación, orquesta la navegación.
+│       └── AndroidManifest.xml
+├── core/                   # Módulos con código compartido y sin lógica de negocio.
+│   ├── api/                # Define las interfaces (ej. `ProjectRepository`) y DTOs.
+│   ├── network/            # Cliente de red centralizado (ej. Ktor/Retrofit).
+│   ├── storage/            # Abstracciones para el acceso al almacenamiento local.
+│   ├── ui/                 # Componentes de Jetpack Compose reutilizables, temas, fuentes.
+│   └── utils/              # Clases de utilidad (ej. formateadores, validadores).
+├── data/                   # Implementación de las interfaces definidas en :core:api.
+│   ├── build.gradle.kts
+│   └── src/main/java/
+│       └── .../data/
+│           ├── project/    # Implementación de `ProjectRepository`, interactúa con
+│           │               # el sistema de archivos y la base de datos local.
+│           └── ai/         # Implementación de repositorios de IA, se comunica con
+│                           # el BFF y gestiona los modelos locales de TFLite.
+├── domain/                 # Lógica de negocio pura (casos de uso), independiente de Android.
+│   ├── build.gradle.kts
+│   └── src/main/java/
+│       └── .../domain/
+│           ├── project/
+│           │   ├── model/      # Modelos de dominio (ej. `Project`, `Task`).
+│           │   └── usecase/    # Casos de uso (ej. `CreateNewProjectUseCase`).
+│           └── ai/
+│               └── usecase/    # Casos de uso de IA (ej. `GenerateCodeUseCase`).
+└── features/               # Módulos correspondientes a cada pantalla o funcionalidad.
+    └── editor/             # Ejemplo de un módulo de funcionalidad.
+        ├── build.gradle.kts
+        └── src/main/java/
+            └── .../editor/
+                ├── state/      # Clases que representan el estado de la UI (ej. `EditorState`).
+                ├── view/       # Composables de la pantalla del editor.
+                └── viewmodel/  # ViewModel que gestiona la lógica de la UI y el estado.
+```
