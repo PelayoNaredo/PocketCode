@@ -1,4 +1,39 @@
-# This Dockerfile is used to containerize the Backend for Frontend (BFF) service.
-# It will define the environment, copy the source code, install dependencies,
-# and specify the command to run the BFF server on Google Cloud Run.
-# This service acts as the main entry point for the mobile client.
+# Stage 1: Builder
+# This stage installs dependencies and builds the TypeScript source code into JavaScript.
+FROM node:18-alpine AS builder
+
+# Set the working directory
+WORKDIR /usr/src/app
+
+# Copy package.json and package-lock.json
+COPY package*.json ./
+
+# Install all dependencies, including devDependencies for building
+RUN npm install
+
+# Copy the rest of the source code
+COPY . .
+
+# Run the build script to compile TypeScript to JavaScript
+RUN npm run build
+
+# Stage 2: Runner
+# This stage creates the final, lightweight image for production.
+FROM node:18-alpine
+
+WORKDIR /usr/src/app
+
+# Copy package.json and package-lock.json
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm install --omit=dev
+
+# Copy the compiled code from the builder stage
+COPY --from=builder /usr/src/app/dist ./dist
+
+# Expose the port the app runs on
+EXPOSE 3000
+
+# Set the default command to run the application
+CMD [ "node", "dist/index.js" ]
