@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pocketcode.core.ui.components.input.PocketTextField
 
 @Composable
 fun AssetUploadScreen(
@@ -41,17 +42,17 @@ fun AssetUploadScreen(
     ) {
         Text("Upload New Asset", style = MaterialTheme.typography.headlineMedium)
 
-        OutlinedTextField(
+        PocketTextField(
             value = uiState.name,
             onValueChange = viewModel::onNameChange,
-            label = { Text("Asset Name") },
+            label = "Asset Name",
             modifier = Modifier.fillMaxWidth()
         )
 
-        OutlinedTextField(
+        PocketTextField(
             value = uiState.description,
             onValueChange = viewModel::onDescriptionChange,
-            label = { Text("Description") },
+            label = "Description",
             modifier = Modifier.fillMaxWidth(),
             maxLines = 5
         )
