@@ -1,7 +1,41 @@
 ---
 
-## Checklist QA y Documentación Final (pendiente)
+## 🎯 Tareas Pendientes (Post-Migración)
 
+**Ver detalles completos en:** `TAREAS_PENDIENTES.md` y `TAREAS_PENDIENTES_RESUMEN.md`
+
+### 🔴 Prioridad Alta (4-6 horas)
+- [ ] Implementar TODOs del Editor en CodeEditorViewModel.kt:
+  - [ ] copySelection() - Copiar texto seleccionado
+  - [ ] cutSelection() - Cortar texto seleccionado
+  - [ ] paste() - Pegar desde clipboard
+  - [ ] selectAll() - Seleccionar todo el texto
+  - [ ] duplicateLine() - Mejorar implementación
+  - [ ] deleteLine() - Mejorar implementación
+  - [ ] navigateToLine() - Implementar navegación a línea específica
+
+### 🟡 Prioridad Media (1-2 horas)
+- [ ] Optimizar wildcard imports en 12 archivos:
+  - [ ] Editor: FindAndReplace, EditorComponents, EditorMinimap, CodeFormatter, etc.
+  - [ ] Project: FileExplorer, ProjectSelectionScreen
+- [ ] Completar tests stubs con aserciones:
+  - [ ] AuthScreenTest.kt
+  - [ ] DesignerScreenTest.kt
+  - [ ] EditorContainerTest.kt
+
+### 🟢 Prioridad Baja (Opcional)
+- [ ] Resolver TODOs menores:
+  - [ ] IdeWorkspaceScreen (save, isModified, more options)
+  - [ ] LoginScreen (recuperar contraseña)
+  - [ ] OnboardingScreenTest (verificar indicador)
+- [ ] Componentes helpers opcionales:
+  - [ ] PocketPasswordField
+  - [ ] PocketSearchField
+
+## Checklist QA y Documentación Final
+
+- [x] Migración Material3 → Pocket completada al 100%
+- [x] Documentación exhaustiva creada (4 archivos)
 - [ ] Stories interactivos en PocketComponents.kt para:
   - PocketDialog (confirmación, formulario, danger)
   - PocketSnackbar (con acción, sin acción)
