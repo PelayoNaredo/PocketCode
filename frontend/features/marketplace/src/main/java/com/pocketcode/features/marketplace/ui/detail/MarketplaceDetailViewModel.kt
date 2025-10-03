@@ -20,21 +20,34 @@ class MarketplaceDetailViewModel @Inject constructor(
     private val getAssetReviewsUseCase: GetAssetReviewsUseCase
 ) : ViewModel() {
 
-    private val assetId: String = savedStateHandle.get<String>("assetId")!!
+    private var currentAssetId: String = savedStateHandle.get<String>("assetId")!!
 
     private val _uiState = MutableStateFlow(MarketplaceDetailState())
     val uiState: StateFlow<MarketplaceDetailState> = _uiState.asStateFlow()
 
     init {
-        loadAssetDetails()
+        loadAssetDetails(currentAssetId)
     }
 
-    private fun loadAssetDetails() {
+    fun refreshAsset(assetId: String) {
+        if (assetId.isBlank()) return
+        if (assetId != currentAssetId) {
+            currentAssetId = assetId
+        }
+        loadAssetDetails(assetId)
+    }
+
+    fun reloadCurrentAsset() {
+        loadAssetDetails(currentAssetId)
+    }
+
+    private fun loadAssetDetails(assetId: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
             val detailsResult = getAssetDetailsUseCase(assetId)
             val reviewsResult = getAssetReviewsUseCase(assetId)
+            var errorMessage: String? = null
 
             detailsResult
                 .onSuccess { asset ->
@@ -50,10 +63,10 @@ class MarketplaceDetailViewModel @Inject constructor(
                     _uiState.update { it.copy(reviews = reviews) }
                 }
                 .onFailure { error ->
-                    // Handle review loading failure separately if needed
+                    errorMessage = error.message
                 }
 
-            _uiState.update { it.copy(isLoading = false, error = null) }
+            _uiState.update { it.copy(isLoading = false, error = errorMessage) }
         }
     }
 }

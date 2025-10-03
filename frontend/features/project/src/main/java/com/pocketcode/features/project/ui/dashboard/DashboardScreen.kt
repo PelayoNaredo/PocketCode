@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -54,6 +55,7 @@ import com.pocketcode.core.ui.tokens.ColorTokens
 import com.pocketcode.core.ui.tokens.ComponentTokens.ButtonSize
 import com.pocketcode.core.ui.tokens.ComponentTokens.ButtonVariant
 import com.pocketcode.core.ui.tokens.SpacingTokens
+import com.pocketcode.core.ui.tokens.TypographyTokens
 import com.pocketcode.domain.project.model.Project
 import kotlinx.coroutines.launch
 
@@ -363,18 +365,34 @@ private fun ProjectListItem(
     project: Project,
     onClick: () -> Unit
 ) {
-    ProjectCard(
-        title = project.name,
-        subtitle = project.localPath,
-        onClick = onClick,
-        leadingContent = {
+    ProjectCard(onClick = onClick) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = SpacingTokens.Semantic.contentSpacingNormal)
+                .padding(vertical = SpacingTokens.Semantic.contentSpacingTight),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(SpacingTokens.Semantic.contentSpacingNormal)
+        ) {
             Icon(
                 imageVector = PocketIcons.Folder,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary
             )
-        },
-        trailingContent = {
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = project.name,
+                    style = TypographyTokens.Title.medium,
+                    color = ColorTokens.onSurface
+                )
+                Text(
+                    text = project.localPath,
+                    style = TypographyTokens.Body.small,
+                    color = ColorTokens.onSurfaceVariant
+                )
+            }
+
             PocketButton(
                 text = "Abrir",
                 onClick = onClick,
@@ -382,7 +400,7 @@ private fun ProjectListItem(
                 size = ButtonSize.Small
             )
         }
-    )
+    }
 }
 
 private fun android.content.ContentResolver.queryDisplayName(uri: Uri): String? {

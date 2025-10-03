@@ -54,6 +54,12 @@ class ProjectRepositoryImplTest {
 
     @Test
     fun `getProjects should return a list of existing projects`() = runTest {
+        // Clear any existing projects first
+        val initialProjects = repository.getProjects().first()
+        initialProjects.forEach { project ->
+            repository.deleteProject(project.id)
+        }
+        
         repository.createProject("Project1")
         repository.createProject("Project2")
 
@@ -98,11 +104,14 @@ class ProjectRepositoryImplTest {
         File(project.localPath, "dir1").mkdir()
         repository.saveFileContent(project, "dir1/file2.txt", "content2")
 
-
         val rootFiles = repository.listFiles(project, "").getOrThrow()
-        assertEquals(5, rootFiles.size) // build.gradle.kts, AndroidManifest.xml, src, file1.txt, dir1
+        // Expected files: build.gradle.kts, src (dir), file1.txt, dir1 (dir) = 4 items  
+        // Note: AndroidManifest.xml is in src/main/, not root
+        assertEquals(4, rootFiles.size) 
         assertTrue(rootFiles.any { it.name == "file1.txt" })
         assertTrue(rootFiles.any { it.name == "dir1" && it.isDirectory })
+        assertTrue(rootFiles.any { it.name == "src" && it.isDirectory })
+        assertTrue(rootFiles.any { it.name == "build.gradle.kts" && !it.isDirectory })
 
         val dir1Files = repository.listFiles(project, "dir1").getOrThrow()
         assertEquals(1, dir1Files.size)

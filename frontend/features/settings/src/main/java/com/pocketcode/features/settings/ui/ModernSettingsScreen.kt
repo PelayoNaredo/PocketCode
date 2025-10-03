@@ -69,7 +69,7 @@ import com.pocketcode.core.ui.tokens.ComponentTokens.ButtonVariant
 import com.pocketcode.core.ui.tokens.ComponentTokens.CardVariant
 import com.pocketcode.features.settings.model.AIProvider
 import com.pocketcode.features.settings.model.FontSize
-import com.pocketcode.features.settings.model.ThemeMode
+import com.pocketcode.core.ui.theme.ThemeMode
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -81,7 +81,6 @@ fun ModernSettingsScreen(
 ) {
     val pagerState = rememberPagerState(pageCount = { 5 })
     val scope = rememberCoroutineScope()
-    val globalSnackbarDispatcher = LocalGlobalSnackbarDispatcher.current
     val toastDispatcher = LocalGlobalToastDispatcher.current
     val onSettingChanged: (String, GlobalSnackbarSeverity) -> Unit = { message, severity ->
         val toastStyle = when (severity) {
@@ -123,20 +122,19 @@ fun ModernSettingsScreen(
         tabs = tabs,
         selectedTabIndex = pagerState.currentPage,
         onTabSelected = { index -> scope.launch { pagerState.animateScrollToPage(index) } }
-    ) { _ ->
-        HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                when (page) {
-                    0 -> GeneralSettingsTab(settingsViewModel, themeViewModel, onSettingChanged)
-                    1 -> EditorSettingsTab(settingsViewModel, onSettingChanged)
-                    2 -> AISettingsTab(settingsViewModel, onSettingChanged)
-                    3 -> ProjectSettingsTab(settingsViewModel, onSettingChanged)
-                    4 -> AboutTab()
-                }
+    ) { paddingValues ->
+        HorizontalPager(
+            state = pagerState, 
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) { page ->
+            when (page) {
+                0 -> GeneralSettingsTab(settingsViewModel, themeViewModel, onSettingChanged, paddingValues)
+                1 -> EditorSettingsTab(settingsViewModel, onSettingChanged, paddingValues)
+                2 -> AISettingsTab(settingsViewModel, onSettingChanged, paddingValues)
+                3 -> ProjectSettingsTab(settingsViewModel, onSettingChanged, paddingValues)
+                4 -> AboutTab(paddingValues)
             }
         }
     }
@@ -146,13 +144,22 @@ fun ModernSettingsScreen(
 private fun GeneralSettingsTab(
     settingsViewModel: SettingsViewModel,
     themeViewModel: ThemeViewModel,
-    onSettingChanged: (String, GlobalSnackbarSeverity) -> Unit
+    onSettingChanged: (String, GlobalSnackbarSeverity) -> Unit,
+    paddingValues: PaddingValues
 ) {
-    val isDarkTheme by themeViewModel.isDarkTheme.collectAsState()
     val settingsState by settingsViewModel.uiState.collectAsState()
     val appSettings = settingsState.userSettings.appSettings
+    val systemDark = androidx.compose.foundation.isSystemInDarkTheme()
 
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp,
+            bottom = paddingValues.calculateBottomPadding() + 96.dp
+        )
+    ) {
         item {
             SectionLayout(title = "Apariencia") {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -164,21 +171,35 @@ private fun GeneralSettingsTab(
 
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         ThemeFilterChip(
-                            selected = !isDarkTheme,
+                            selected = appSettings.themeMode == ThemeMode.SYSTEM,
+                            icon = Icons.Default.Settings,
+                            label = "Sistema"
+                        ) {
+                            settingsViewModel.updateThemeMode(ThemeMode.SYSTEM)
+                            themeViewModel.setThemeMode(
+                                mode = ThemeMode.SYSTEM,
+                                persist = false,
+                                isDarkOverride = systemDark
+                            )
+                            themeViewModel.updateSystemDarkTheme(systemDark)
+                            onSettingChanged("Tema del sistema activado", GlobalSnackbarSeverity.SUCCESS)
+                        }
+                        ThemeFilterChip(
+                            selected = appSettings.themeMode == ThemeMode.LIGHT,
                             icon = Icons.Default.LightMode,
                             label = "Claro"
                         ) {
                             settingsViewModel.updateThemeMode(ThemeMode.LIGHT)
-                            themeViewModel.setDarkTheme(false)
+                            themeViewModel.setDarkTheme(isDark = false, persist = false)
                             onSettingChanged("Tema claro activado", GlobalSnackbarSeverity.SUCCESS)
                         }
                         ThemeFilterChip(
-                            selected = isDarkTheme,
+                            selected = appSettings.themeMode == ThemeMode.DARK,
                             icon = Icons.Default.DarkMode,
                             label = "Oscuro"
                         ) {
                             settingsViewModel.updateThemeMode(ThemeMode.DARK)
-                            themeViewModel.setDarkTheme(true)
+                            themeViewModel.setDarkTheme(isDark = true, persist = false)
                             onSettingChanged("Tema oscuro activado", GlobalSnackbarSeverity.SUCCESS)
                         }
                     }
@@ -270,23 +291,31 @@ private fun ThemeFilterChip(
     onSelected: () -> Unit
 ) {
     PocketFilterChip(
-        label = label,
         selected = selected,
         onClick = onSelected,
-        leadingIcon = { Icon(icon, contentDescription = null) },
-        showSelectedCheck = false
+        label = label,
+        leadingIcon = icon
     )
 }
 
 @Composable
 private fun EditorSettingsTab(
     settingsViewModel: SettingsViewModel,
-    onSettingChanged: (String, GlobalSnackbarSeverity) -> Unit
+    onSettingChanged: (String, GlobalSnackbarSeverity) -> Unit,
+    paddingValues: PaddingValues
 ) {
     val settingsState by settingsViewModel.uiState.collectAsState()
     val editorSettings = settingsState.userSettings.editorSettings
 
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp,
+            bottom = paddingValues.calculateBottomPadding() + 96.dp
+        )
+    ) {
         item {
             SectionLayout(title = "Visualización") {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -389,12 +418,21 @@ private fun EditorSettingsTab(
 @Composable
 private fun AISettingsTab(
     settingsViewModel: SettingsViewModel,
-    onSettingChanged: (String, GlobalSnackbarSeverity) -> Unit
+    onSettingChanged: (String, GlobalSnackbarSeverity) -> Unit,
+    paddingValues: PaddingValues
 ) {
     val settingsState by settingsViewModel.uiState.collectAsState()
     val aiSettings = settingsState.userSettings.aiSettings
 
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp,
+            bottom = paddingValues.calculateBottomPadding() + 96.dp
+        )
+    ) {
         item {
             SectionLayout(title = "Asistente IA") {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -472,12 +510,21 @@ private fun AISettingsTab(
 @Composable
 private fun ProjectSettingsTab(
     settingsViewModel: SettingsViewModel,
-    onSettingChanged: (String, GlobalSnackbarSeverity) -> Unit
+    onSettingChanged: (String, GlobalSnackbarSeverity) -> Unit,
+    paddingValues: PaddingValues
 ) {
     val settingsState by settingsViewModel.uiState.collectAsState()
     val projectSettings = settingsState.userSettings.projectSettings
 
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 16.dp,
+            bottom = paddingValues.calculateBottomPadding() + 96.dp
+        )
+    ) {
         item {
             SectionLayout(title = "Gestión de proyectos") {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -524,7 +571,7 @@ private fun ProjectSettingsTab(
 }
 
 @Composable
-private fun AboutTab() {
+private fun AboutTab(paddingValues: PaddingValues) {
     var showLicensesDialog by rememberSaveable { mutableStateOf(false) }
 
     Column(
@@ -532,7 +579,12 @@ private fun AboutTab() {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
             .clip(RoundedCornerShape(16.dp))
-            .padding(24.dp),
+            .padding(
+                start = 24.dp,
+                end = 24.dp,
+                top = 24.dp,
+                bottom = paddingValues.calculateBottomPadding() + 96.dp
+            ),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Text(

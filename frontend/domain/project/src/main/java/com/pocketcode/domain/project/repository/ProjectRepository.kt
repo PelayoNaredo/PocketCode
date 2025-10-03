@@ -1,6 +1,7 @@
 package com.pocketcode.domain.project.repository
 
 import com.pocketcode.domain.project.model.Project
+import com.pocketcode.domain.project.model.ProjectImportRequest
 import com.pocketcode.domain.project.model.ProjectFile
 import kotlinx.coroutines.flow.Flow
 
@@ -24,6 +25,8 @@ interface ProjectRepository {
     suspend fun getProject(id: String): Project?
 
     suspend fun createProject(name: String): Result<Project>
+
+    suspend fun importProject(request: ProjectImportRequest): Result<Project>
 
     suspend fun deleteProject(id: String): Result<Unit>
 

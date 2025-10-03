@@ -1,7 +1,11 @@
 package com.pocketcode.core.ui.theme
 
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 /**
  * This file defines the application's theme.
@@ -20,8 +24,21 @@ import androidx.compose.runtime.Composable
  */
 @Composable
 fun PocketCodeTheme(content: @Composable () -> Unit) {
-    MaterialTheme(
-        // ColorScheme, Typography, and Shapes would be defined here
-        content = content
-    )
+    val themeViewModel: ThemeViewModel = viewModel()
+    val themeMode by themeViewModel.themeMode.collectAsState()
+    val systemDark = isSystemInDarkTheme()
+
+    val isDarkTheme = when (themeMode) {
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+        ThemeMode.SYSTEM -> systemDark
+    }
+
+    LaunchedEffect(themeMode, isDarkTheme) {
+        themeViewModel.updateSystemDarkTheme(isDarkTheme)
+    }
+
+    PocketTheme(darkTheme = isDarkTheme) {
+        content()
+    }
 }

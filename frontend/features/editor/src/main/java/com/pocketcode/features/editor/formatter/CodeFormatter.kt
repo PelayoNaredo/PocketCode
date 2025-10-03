@@ -5,8 +5,25 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.FormatAlignLeft
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -360,13 +377,9 @@ class KotlinFormatter : CodeFormatter {
     }
     
     private fun wrapLongLine(line: String, config: FormatterConfig): String {
-        // Simplified line wrapping - in practice, this would be more sophisticated
         if (line.length <= config.maxLineLength) return line
-        
-        val indent = line.takeWhile { it.isWhitespace() }
-        val content = line.drop(indent.length)
-        
-        return line // For now, return as-is
+        // TODO: Implement real wrapping respecting indent and operator precedence
+        return line
     }
 }
 
@@ -392,7 +405,7 @@ class JavaFormatter : CodeFormatter {
         )
     }
     
-    private suspend fun formatJavaCode(text: String, config: FormatterConfig): String {
+    private suspend fun formatJavaCode(text: String, _config: FormatterConfig): String {
         // Simplified Java formatting
         return text.lines().joinToString("\n") { line ->
             line.trim()
@@ -421,7 +434,7 @@ class JavaScriptFormatter : CodeFormatter {
         )
     }
     
-    private suspend fun formatJavaScriptCode(text: String, config: FormatterConfig): String {
+    private suspend fun formatJavaScriptCode(text: String, _config: FormatterConfig): String {
         // Simplified JavaScript formatting
         return text
     }
@@ -448,7 +461,7 @@ class TypeScriptFormatter : CodeFormatter {
         )
     }
     
-    private suspend fun formatTypeScriptCode(text: String, config: FormatterConfig): String {
+    private suspend fun formatTypeScriptCode(text: String, _config: FormatterConfig): String {
         // Simplified TypeScript formatting
         return text
     }
@@ -475,7 +488,7 @@ class PythonFormatter : CodeFormatter {
         )
     }
     
-    private suspend fun formatPythonCode(text: String, config: FormatterConfig): String {
+    private suspend fun formatPythonCode(text: String, _config: FormatterConfig): String {
         // Python-specific formatting following PEP 8
         return text
     }
@@ -502,7 +515,7 @@ class XmlFormatter : CodeFormatter {
         )
     }
     
-    private suspend fun formatXmlCode(text: String, config: FormatterConfig): String {
+    private suspend fun formatXmlCode(text: String, _config: FormatterConfig): String {
         // XML formatting with proper indentation
         return text
     }
@@ -529,7 +542,7 @@ class JsonFormatter : CodeFormatter {
         )
     }
     
-    private suspend fun formatJsonCode(text: String, config: FormatterConfig): String {
+    private suspend fun formatJsonCode(text: String, _config: FormatterConfig): String {
         // JSON formatting
         return text
     }
@@ -591,7 +604,7 @@ fun FormatterConfigPanel(
                 )
                 
                 FilledTonalButton(onClick = onFormatNow) {
-                    Icon(Icons.Default.FormatAlignLeft, contentDescription = null)
+                    Icon(Icons.AutoMirrored.Filled.FormatAlignLeft, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Formatear ahora")
                 }

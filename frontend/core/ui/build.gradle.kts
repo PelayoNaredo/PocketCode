@@ -1,6 +1,8 @@
 plugins {
 	id("com.android.library")
 	id("org.jetbrains.kotlin.android")
+	id("kotlin-kapt")
+	id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -60,12 +62,15 @@ dependencies {
 	implementation("androidx.compose.runtime:runtime")
 	implementation("androidx.compose.foundation:foundation-layout")
 	implementation("androidx.compose.material3:material3-window-size-class")
+	implementation("androidx.datastore:datastore-preferences:1.0.0")
 
 	implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
 	implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
 	implementation("androidx.navigation:navigation-compose:2.7.7")
 
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+	implementation("com.google.dagger:hilt-android:2.50")
+	kapt("com.google.dagger:hilt-android-compiler:2.50")
 
 	debugImplementation("androidx.compose.ui:ui-tooling")
 	debugImplementation("androidx.compose.ui:ui-test-manifest")

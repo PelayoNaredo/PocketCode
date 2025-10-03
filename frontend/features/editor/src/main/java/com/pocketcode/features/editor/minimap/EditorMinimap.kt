@@ -10,7 +10,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,7 +34,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -748,9 +759,6 @@ private fun MinimapHeader(
     state: MinimapState,
     onToggleVisibility: () -> Unit
 ) {
-    val config by state.config.collectAsState()
-    val isHovered by state.isHovered.collectAsState()
-    
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -802,8 +810,6 @@ private fun MinimapCanvas(
     onLineClick: (Int) -> Unit,
     modifier: Modifier
 ) {
-    val density = LocalDensity.current
-    
     Canvas(
         modifier = modifier
             .pointerInput(Unit) {
@@ -862,7 +868,7 @@ private fun DrawScope.drawSyntaxTokens(
     tokens: List<MinimapToken>,
     lineHeight: Float,
     charWidth: Float,
-    config: MinimapConfig
+    _config: MinimapConfig
 ) {
     tokens.forEach { token ->
         val y = token.line * lineHeight
@@ -883,7 +889,7 @@ private fun DrawScope.drawMarkers(
     markers: List<MinimapMarker>,
     lineHeight: Float,
     canvasWidth: Float,
-    config: MinimapConfig
+    _config: MinimapConfig
 ) {
     markers.forEach { marker ->
         val y = marker.line * lineHeight
@@ -960,7 +966,7 @@ private fun DrawScope.drawViewportIndicator(
     viewport: EditorViewport,
     lineHeight: Float,
     canvasSize: Size,
-    config: MinimapConfig
+    _config: MinimapConfig
 ) {
     val startY = viewport.startLine * lineHeight
     val endY = viewport.endLine * lineHeight + lineHeight

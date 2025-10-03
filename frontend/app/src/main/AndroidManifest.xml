@@ -1,40 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-This is the main Android Manifest file for the application.
-It declares the fundamental components and properties of the app.
-
-Responsibilities:
-- Declare the application's package name.
-- Define the application class (e.g., `com.pocketcode.PocketCodeApp`), which is the entry point for Hilt.
-- Declare all activities, including the main launcher activity (`MainActivity`).
-- Request necessary permissions (e.g., INTERNET, READ/WRITE_EXTERNAL_STORAGE).
-- Define the application's icon, label, and theme.
-
-This file is the root configuration for the Android OS to understand how to run the app.
--->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.pocketcode">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Required for RevenueCat -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.android.vending.BILLING" />
 
     <application
-        android:name=".app.PocketCodeApp"
-        android:label="@string/app_name"
-        android:theme="@style/Theme.PocketCode"
+        android:name=".PocketCodeApp"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android.supportsRtl="true">
+        android:label="PocketCode"
+        android:theme="@android:style/Theme.Material.NoActionBar"
+        android:supportsRtl="true">
+
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            tools:node="remove" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.PocketCode">
+            android:label=""
+            android:theme="@android:style/Theme.Material.NoActionBar.Fullscreen"
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            
+            <!-- Deep link intent filters -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="pocketcode" android:host="app" />
+            </intent-filter>
+            
+            <!-- HTTP/HTTPS deep links (if needed for web integration) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https"
+                      android:host="pocketcode.app" />
             </intent-filter>
         </activity>
     </application>

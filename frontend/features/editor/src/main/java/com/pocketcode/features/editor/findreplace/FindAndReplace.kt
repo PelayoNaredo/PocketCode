@@ -11,7 +11,16 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -21,7 +30,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -146,7 +154,6 @@ fun FindReplacePanel(
     onNavigateToMatch: (SearchResult) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
     val searchFocusRequester = remember { FocusRequester() }
     val replaceFocusRequester = remember { FocusRequester() }
     
@@ -204,10 +211,7 @@ fun FindReplacePanel(
                 
                 // Results summary
                 if (state.hasMatches) {
-                    SearchResultsSummary(
-                        state = state,
-                        onNavigateToMatch = onNavigateToMatch
-                    )
+                    SearchResultsSummary(state = state)
                 }
             }
         }
@@ -291,8 +295,15 @@ private fun SearchInputSection(
                         state.currentMatchIndex = -1
                     }
                 },
+                label = "Buscar",
                 placeholder = "Buscar...",
-                leadingIcon = Icons.Default.Search,
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Buscar",
+                        modifier = Modifier.size(16.dp)
+                    )
+                },
                 trailingIcon = {
                     Row {
                         if (state.searchQuery.isNotBlank()) {
@@ -390,8 +401,15 @@ private fun ReplaceInputSection(
             PocketTextField(
                 value = state.replaceText,
                 onValueChange = { state.replaceText = it },
+                label = "Reemplazar",
                 placeholder = "Reemplazar con...",
-                leadingIcon = Icons.Default.FindReplace,
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.FindReplace,
+                        contentDescription = "Reemplazar",
+                        modifier = Modifier.size(16.dp)
+                    )
+                },
                 trailingIcon = {
                     if (state.replaceHistory.isNotEmpty()) {
                         IconButton(
@@ -464,7 +482,7 @@ private fun ReplaceInputSection(
             IconButton(
                 onClick = {
                     coroutineScope.launch {
-                        val count = onReplaceAll(state.searchQuery, state.replaceText, state.searchOptions)
+                        onReplaceAll(state.searchQuery, state.replaceText, state.searchOptions)
                         state.addToReplaceHistory(state.replaceText)
                         // Show snackbar with result count
                     }
@@ -605,8 +623,7 @@ private fun SearchOptionsSection(
 
 @Composable
 private fun SearchResultsSummary(
-    state: FindReplaceState,
-    onNavigateToMatch: (SearchResult) -> Unit
+    state: FindReplaceState
 ) {
     Card(
         colors = CardDefaults.cardColors(
@@ -626,14 +643,13 @@ private fun SearchResultsSummary(
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
             
-            // Quick navigation
-            if (state.totalMatches > 1) {
-                Text(
-                    text = "Navegar con ↑ ↓",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                )
-            }
+                    if (state.totalMatches > 1) {
+                        Text(
+                            text = "Navegar con ↑ ↓",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                        )
+                    }
         }
     }
 }
